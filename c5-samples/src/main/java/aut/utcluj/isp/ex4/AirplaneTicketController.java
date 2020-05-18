@@ -14,6 +14,11 @@ public class AirplaneTicketController {
     public static final int DEFAULT_NUMBER_OF_TICKETS = 10;
     private List<AirplaneTicket> tickets;
 
+    public AirplaneTicketController() {
+        tickets = new ArrayList<>();
+        generateTickets();
+    }
+
     /**
      * Generate default tickets
      */
@@ -52,7 +57,11 @@ public class AirplaneTicketController {
      * @apiNote: this method should throw {@link NoTicketAvailableException} exception if ticket not found
      */
     public AirplaneTicket getTicketDetails(final String ticketId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        for (AirplaneTicket ticket : tickets) {
+            if (ticket.getId().equals(ticketId))
+                return ticket;
+        }
+        throw new NoTicketAvailableException("No Ticket Available!");
     }
 
     /**
@@ -67,7 +76,19 @@ public class AirplaneTicketController {
      * {@link NoTicketAvailableException} - if destination exists but no ticket with NEW status available
      */
     public void buyTicket(final String destination, final String customerId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        boolean existDestination=false , ticketAvailable = false;
+        for (AirplaneTicket ticket : tickets) {
+            if(ticket.getDestination().equals(destination)) {
+                existDestination=true;
+                if(ticket.getStatus().equals(TicketStatus.NEW)){
+                    ticketAvailable=true;
+                    ticket.setCustomerId(customerId);
+                    ticket.setStatus(TicketStatus.ACTIVE);
+                }
+            }
+        }
+        if(existDestination) { throw new NoDestinationAvailableException("No destination available."); }
+        if(ticketAvailable) { throw new NoTicketAvailableException("No ticket available."); }
     }
 
     /**
@@ -81,7 +102,10 @@ public class AirplaneTicketController {
      * {@link TicketNotAssignedException} - if ticket is not assigned to any user
      */
     public void cancelTicket(final String ticketId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+
+        if (getTicketDetails(ticketId).getCustomerId() == null)
+            throw new TicketNotAssignedException("Ticket bot assigned");
+        getTicketDetails(ticketId).setStatus(TicketStatus.CANCELED);
     }
 
     /**
@@ -95,7 +119,7 @@ public class AirplaneTicketController {
      * {@link TicketNotAssignedException} - if ticket is not assigned to any user
      */
     public void changeTicketCustomerId(final String ticketId, final String customerId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        getTicketDetails(ticketId).setCustomerId(customerId);
     }
 
     /**
@@ -106,7 +130,10 @@ public class AirplaneTicketController {
      * @return
      */
     public List<AirplaneTicket> filterTicketsByStatus(final TicketStatus status) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        List<AirplaneTicket> filteredStatus = new ArrayList<>();
+        for (AirplaneTicket ticket : tickets){
+            if (ticket.getStatus().equals(status)) filteredStatus.add(ticket);}
+        return filteredStatus;
     }
 
     /**
@@ -116,6 +143,16 @@ public class AirplaneTicketController {
      * @apiNote: only tickets with available name should be returned
      */
     public Map<String, List<AirplaneTicket>> groupTicketsByCustomerId() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        Map<String , List<AirplaneTicket>> MGroupTickets = new HashMap<>();
+        for (int i = 0 ; i < tickets.size() ; i++){
+            ArrayList<AirplaneTicket> LGroupTickets = new ArrayList<>();
+            for (int j = i ; j < tickets.size() ; j++){
+                if (tickets.get(j).getCustomerId().equals(tickets.get(j).getCustomerId())){
+                    LGroupTickets.add(tickets.get(j));
+                }
+            }
+            MGroupTickets.put(tickets.get(i).getCustomerId(),LGroupTickets);
+        }
+        return MGroupTickets;
     }
 }
