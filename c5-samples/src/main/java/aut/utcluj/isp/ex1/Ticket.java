@@ -1,5 +1,7 @@
 package aut.utcluj.isp.ex1;
 
+import java.util.Objects;
+
 /**
  * @author stefan
  */
@@ -10,11 +12,14 @@ public class Ticket {
 
     public Ticket(String customerName, Double price) {
         this.id = String.valueOf(Math.random());
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.customerName=customerName;
+        this.price=price;
     }
 
     public Ticket(String id, String customerName, Double price) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        this.id=id;
+        this.customerName=customerName;
+        this.price=price;
     }
 
     public String getId() {
@@ -27,5 +32,20 @@ public class Ticket {
 
     public Double getPrice() {
         return price;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Ticket)) return false;
+        Ticket ticket = (Ticket) o;
+        return getId().equals(ticket.getId()) &&
+                Objects.equals(getCustomerName(), ticket.getCustomerName()) &&
+                Objects.equals(getPrice(), ticket.getPrice());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getCustomerName(), getPrice());
     }
 }
