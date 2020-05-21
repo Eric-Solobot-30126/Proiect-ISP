@@ -21,3 +21,15 @@ Steps for resolving lab:
 Exercise 1
 
 ![Exercise 1 image](c5-samples/docs/ex1.jpg)
+
+Exercise 2
+
+![Exercise 2 image](c5-samples/docs/ex2.jpg)
+
+Exercise 3
+
+![Exercise 3 image](c5-samples/docs/exe3.jpg)
+
+Exercise 4
+
+![Exercise 4 image](c5-samples/docs/ex4.jpg)
