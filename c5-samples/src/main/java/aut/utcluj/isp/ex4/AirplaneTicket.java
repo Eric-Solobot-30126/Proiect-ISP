@@ -11,10 +11,10 @@ public class AirplaneTicket {
     private TicketStatus status;
 
     public AirplaneTicket(String id, Double price, String destination) {
-        this.customerId = null;
-        this.id = id;
-        this.price = price;
-        this.destination = destination;
+        this.customerId=null;
+        this.id=id;
+        this.price=price;
+        this.destination=destination;
     }
 
     public String getId() {
@@ -37,7 +37,11 @@ public class AirplaneTicket {
         return status;
     }
 
+    public void setCustomerId(String customerId) { this.customerId = customerId; }
+
     public void setStatus(TicketStatus status) {
         this.status = status;
     }
+
+    public void setDestination(String destination) { this.destination = destination; }
 }

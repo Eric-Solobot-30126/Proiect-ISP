@@ -1,13 +1,15 @@
 package aut.utcluj.isp.ex4;
 
-
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author stefan
  */
-public class AirplaneTicketController {
+public class AirplaneTicketController implements AirplaneTicketControllerInterface{
+
     /**
      * Default number of tickets when a new instance is created
      */
@@ -25,7 +27,7 @@ public class AirplaneTicketController {
     private void generateTickets() {
         for (int i = 0; i < DEFAULT_NUMBER_OF_TICKETS; i++) {
             String destination;
-            Double price;
+            double price;
 
             if (i < 3) {
                 destination = "Cluj-Napoca";
@@ -53,14 +55,13 @@ public class AirplaneTicketController {
      * Get ticket details by ticket id
      *
      * @param ticketId - unique ticket id
-     * @return
+     * @return AirplaneTicket
      * @apiNote: this method should throw {@link NoTicketAvailableException} exception if ticket not found
      */
     public AirplaneTicket getTicketDetails(final String ticketId) {
-        for (AirplaneTicket ticket : tickets) {
+        for (AirplaneTicket ticket : tickets){
             if (ticket.getId().equals(ticketId))
-                return ticket;
-        }
+                return ticket;}
         throw new NoTicketAvailableException("No Ticket Available!");
     }
 
@@ -70,25 +71,29 @@ public class AirplaneTicketController {
      *
      * @param destination - destination
      * @param customerId  - customer name
-     * @return
      * @apiNote: this method should throw the following exceptions:
      * {@link NoDestinationAvailableException} - if destination not supported by AirplaneTicketController
      * {@link NoTicketAvailableException} - if destination exists but no ticket with NEW status available
      */
     public void buyTicket(final String destination, final String customerId) {
-        boolean existDestination=false , ticketAvailable = false;
-        for (AirplaneTicket ticket : tickets) {
-            if(ticket.getDestination().equals(destination)) {
-                existDestination=true;
-                if(ticket.getStatus().equals(TicketStatus.NEW)){
-                    ticketAvailable=true;
+        boolean destinationExists=false , isAvailable=false;
+        for (AirplaneTicket ticket : tickets){
+            if (ticket.getDestination().equals(destination)){
+                destinationExists=true;
+                if (ticket.getStatus().equals(TicketStatus.NEW)) {
+                    isAvailable = true;
                     ticket.setCustomerId(customerId);
                     ticket.setStatus(TicketStatus.ACTIVE);
+                    break;
                 }
             }
         }
-        if(existDestination) { throw new NoDestinationAvailableException("No destination available."); }
-        if(ticketAvailable) { throw new NoTicketAvailableException("No ticket available."); }
+        if ( !destinationExists ) {
+            throw new NoDestinationAvailableException("Don't have tickets with this destination.");
+        }
+        if ( !isAvailable ) {
+            throw new NoTicketAvailableException("No tickets available.");
+        }
     }
 
     /**
@@ -96,16 +101,28 @@ public class AirplaneTicketController {
      * Status of the ticket should be set to {@link TicketStatus#CANCELED}
      *
      * @param ticketId - unique ticket id
-     * @return
      * @apiNote: this method should throw the following exceptions:
      * {@link NoTicketAvailableException} - if ticket with this id does not exist
      * {@link TicketNotAssignedException} - if ticket is not assigned to any user
      */
     public void cancelTicket(final String ticketId) {
-
-        if (getTicketDetails(ticketId).getCustomerId() == null)
-            throw new TicketNotAssignedException("Ticket bot assigned");
-        getTicketDetails(ticketId).setStatus(TicketStatus.CANCELED);
+        boolean idExists=false , isAssigned=false;
+        for (AirplaneTicket ticket : tickets){
+            if (ticket.getId().equals(ticketId)){
+                idExists=true;
+                if (ticket.getCustomerId() != null && !ticket.getCustomerId().isEmpty()) {
+                    isAssigned=true;
+                    ticket.setStatus(TicketStatus.CANCELED);
+                    break;
+                }
+            }
+        }
+        if (!idExists) {
+            throw new NoTicketAvailableException("This id does not exist.");
+        }
+        if(!isAssigned) {
+            throw new TicketNotAssignedException("The ticket does not have a customer name.");
+        }
     }
 
     /**
@@ -113,13 +130,26 @@ public class AirplaneTicketController {
      *
      * @param ticketId   - unique ticket id
      * @param customerId - unique customer name
-     * @return
      * @apiNote: this method should throw the following exceptions:
      * {@link NoTicketAvailableException} - if ticket with this id does not exist
      * {@link TicketNotAssignedException} - if ticket is not assigned to any user
      */
     public void changeTicketCustomerId(final String ticketId, final String customerId) {
-        getTicketDetails(ticketId).setCustomerId(customerId);
+        boolean idExists=false , isAssigned = false;
+        for (AirplaneTicket ticket : tickets) {
+            if (ticket.getId().equals(ticketId)){
+                idExists=true;
+                if(ticket.getCustomerId() != null && !ticket.getCustomerId().isEmpty())
+                    isAssigned = true;
+                    ticket.setCustomerId(customerId);
+            }
+        }
+        if ( !idExists ) {
+            throw new NoTicketAvailableException("This id does not exist.");
+        }
+        if ( !isAssigned ) {
+            throw new TicketNotAssignedException("The ticket does not have a customer name.");
+        }
     }
 
     /**
@@ -127,7 +157,7 @@ public class AirplaneTicketController {
      * An empty list should be returned if no tickets available with desired status
      *
      * @param status - ticket status
-     * @return
+     * @return List filtered by status
      */
     public List<AirplaneTicket> filterTicketsByStatus(final TicketStatus status) {
         List<AirplaneTicket> filteredStatus = new ArrayList<>();
@@ -144,15 +174,24 @@ public class AirplaneTicketController {
      */
     public Map<String, List<AirplaneTicket>> groupTicketsByCustomerId() {
         Map<String , List<AirplaneTicket>> MGroupTickets = new HashMap<>();
-        for (int i = 0 ; i < tickets.size() ; i++){
-            ArrayList<AirplaneTicket> LGroupTickets = new ArrayList<>();
-            for (int j = i ; j < tickets.size() ; j++){
-                if (tickets.get(j).getCustomerId().equals(tickets.get(j).getCustomerId())){
-                    LGroupTickets.add(tickets.get(j));
+
+        for ( int i = 0 ; i < tickets.size() ; i++){
+            try {
+                List<AirplaneTicket> ticketsList = new ArrayList<>();
+
+                for (AirplaneTicket ticket : tickets) {
+                    if (tickets.get(i).getCustomerId().equals(ticket.getCustomerId())) {
+                        ticketsList.add(ticket);
+                    }
+
+                    MGroupTickets.put(tickets.get(i).getCustomerId(), ticketsList);
+
                 }
-            }
-            MGroupTickets.put(tickets.get(i).getCustomerId(),LGroupTickets);
+            } catch (NullPointerException ignored) {  }
         }
+
         return MGroupTickets;
+
     }
+
 }
