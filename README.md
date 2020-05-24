@@ -32,4 +32,4 @@ Exercise 3
 
 Exercise 4
 
-![Exercise 4 image](c5-samples/docs/ex4.jpg)
+![Exercise 4 image](c5-samples/docs/exe4.jpg)
